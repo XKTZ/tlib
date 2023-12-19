@@ -1,8 +1,8 @@
 #ifndef __TLIB__TENSOR_BASE_HPP__
 #define __TLIB__TENSOR_BASE_HPP__
 
-#include "tlib/tlib_base.hpp"
-#include "tlib/tlib_util.hpp"
+#include "tlib_base.hpp"
+#include "tlib_util.hpp"
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -203,7 +203,7 @@ public:
     }
 };
 
-std::string shapeToString(const Shape &s) {
+inline std::string shapeToString(const Shape &s) {
     std::stringstream ss;
     ss << '(';
     for (SizeType i = 0, n = s.size(); i < n; i++) {
@@ -223,7 +223,7 @@ using base::Shape;
 
 }; // namespace tensorlib
 
-std::ostream &operator<<(std::ostream &out, const tensorlib::base::Shape &s) {
+inline std::ostream &operator<<(std::ostream &out, const tensorlib::base::Shape &s) {
     out << tensorlib::base::shapeToString(s);
     return out;
 }

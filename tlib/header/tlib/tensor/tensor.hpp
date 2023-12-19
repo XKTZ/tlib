@@ -1,11 +1,11 @@
 #ifndef __TLIB__TENSOR_HPP__
 #define __TLIB__TENSOR_HPP__
 
-#include "tlib/tensor/tensor_computational.hpp"
-#include "tlib/tensor/tensor_grad.hpp"
 #include "tlib/tlib_base.hpp"
 #include "tlib/tlib_dimensional.hpp"
 #include "tlib/tlib_util.hpp"
+#include "tensor_computational.hpp"
+#include "tensor_grad.hpp"
 
 #include <memory>
 #include <type_traits>
@@ -396,8 +396,6 @@ std::ostream &operator<<(std::ostream &out, const tensorlib::tensor::Tensor<T, D
     tensorlib::printer::TensorPrinter::print(out, t);
     return out;
 }
-
-#include "tlib/tensor/tensor_print.hpp"
 
 #include "tensor_operations.hpp"
 

@@ -10,5 +10,4 @@
 #include "tlib/nn/loss.hpp"
 #include "tlib/nn/pool.hpp"
 
-
 #endif

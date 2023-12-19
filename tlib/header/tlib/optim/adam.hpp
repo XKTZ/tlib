@@ -1,8 +1,8 @@
 #ifndef __TLIB__OPTIMIZER_ADAM_HPP__
 #define __TLIB__OPTIMIZER_ADAM_HPP__
 
-#include "tlib/optim/optimizer.hpp"
 #include "tlib/tlib_tensor.hpp"
+#include "optimizer.hpp"
 
 namespace tensorlib {
 namespace optim {

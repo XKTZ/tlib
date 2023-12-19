@@ -14,22 +14,6 @@ int main() {
     using namespace tensorlib::data;
     using namespace tensorlib::optim;
 
-    Tensor ca(1, 1, 3, 3);
-    for (int i = 0; i <9; i ++) {
-        ca.raw()[i] = i;
-    }
-
-    Tensor cv(2, 1, 2, 2);
-    for (int i = 0; i < 8; i ++) {
-        cv.raw()[i] = float(i) / 2;
-    }
-
-    std::cout << ca << '\n';
-    std::cout << cv << '\n';
-
-    std::cout << tensorlib::functional::conv2d(ca, cv) << '\n';
-
-    return 0;
 
     Tensor a = Tensor(5);
 

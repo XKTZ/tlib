@@ -5,8 +5,8 @@
 #ifndef __TLIB__NN_MODULE_HPP__
 #define __TLIB__NN_MODULE_HPP__
 
-#include "tlib/nn/init.hpp"
 #include "tlib/tlib_tensor.hpp"
+#include "init.hpp"
 #include <random>
 #include <vector>
 

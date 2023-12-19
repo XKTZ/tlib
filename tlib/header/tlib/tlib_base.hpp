@@ -6,8 +6,8 @@
 #include <random>
 #include <utility>
 
-#include "tlib/tlib_config.hpp"
-#include "tlib/tlib_util.hpp"
+#include "tlib_config.hpp"
+#include "tlib_util.hpp"
 
 namespace tensorlib {
 
@@ -337,9 +337,9 @@ public:
 
 namespace random {
 
-std::mt19937 randomGen(std::random_device{}());
+inline std::mt19937 randomGen(std::random_device{}());
 
-void manualSeed(SizeType seed) {
+inline void manualSeed(SizeType seed) {
     randomGen = std::mt19937(seed);
 }
 

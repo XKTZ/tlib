@@ -8,7 +8,7 @@
 #ifndef __TLIB__UTIL_HPP__
 #define __TLIB__UTIL_HPP__
 
-#include "tlib/tlib_base.hpp"
+#include "tlib_base.hpp"
 #include <bit>
 #include <cassert>
 #include <iostream>
@@ -93,8 +93,6 @@ struct DataIO {
         out << t << ' ';
     }
 };
-
-int cnt = 0;
 
 template <>
 struct DataIO<float> {

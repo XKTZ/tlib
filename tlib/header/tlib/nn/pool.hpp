@@ -1,12 +1,8 @@
-//
-// Created by xktz on 12/10/23.
-//
+#ifndef __TLIB__NN_POOL_HPP__
+#define __TLIB__NN_POOL_HPP__
 
-#ifndef TLIB_TLIB_TLIB_NN_POOL_HPP
-#define TLIB_TLIB_TLIB_NN_POOL_HPP
-
-#include "tlib/nn/module.hpp"
 #include "tlib/tlib_tensor.hpp"
+#include "module.hpp"
 #include <utility>
 
 namespace tensorlib {
@@ -102,4 +98,4 @@ private:
 }; // namespace nn
 }; // namespace tensorlib
 
-#endif // TLIB_TLIB_TLIB_NN_POOL_HPP
+#endif

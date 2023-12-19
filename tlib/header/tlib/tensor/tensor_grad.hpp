@@ -1,10 +1,10 @@
 #ifndef __TLIB__TENSOR_GRAD__
 #define __TLIB__TENSOR_GRAD__
 
-#include "tlib/tensor/tensor_computational.hpp"
 #include "tlib/tlib_base.hpp"
 #include "tlib/tlib_dimensional.hpp"
 #include "tlib/tlib_util.hpp"
+#include "tensor_computational.hpp"
 
 #include <functional>
 #include <memory>

@@ -9,7 +9,7 @@
 
 #if _TLIB_OPTIMIZE_CPU_BLAS
 
-#include "cblas.h"
+#include "tlib/compute/tlib_engine.hpp"
 #include "tlib/tensor/cpu/tensor_cpu.hpp"
 #include "tlib/tensor/cpu/tensor_cpu_computation.hpp"
 #include "tlib/tensor/cpu/tensor_cpu_computation_base.hpp"
@@ -30,6 +30,7 @@ template <>
 struct Computational<float, device::CPU> {
 private:
     using T = float;
+    using Engine = compute::Engine<T>;
 
 public:
     using Base = cpu::TensorBase<T>;
@@ -82,8 +83,9 @@ public:
         requires computational_cpu::IsAcceptableUnary<T, A>
     static Base negate(A &&a) {
         if (isContiguousable(a)) {
-            return ComputeBase ::PointerLevel::unaryOperation(
-                a, [](SizeType N, T *to, T *x) { cblas_saxpy(blasint(N), -ComputationConstant<T>::One, x, 1, to, 1); });
+            return ComputeBase ::PointerLevel::unaryOperation(a, [](SizeType N, T *to, T *x) {
+                Engine::axpy({N, to, 1}, -ComputationConstant<T>::One, {N, x, 1});
+            });
         }
         return ComputeBase::template unaryEvaluateOperation(a, [](const auto &x) { return -x; });
     }
@@ -103,16 +105,16 @@ public:
             return ComputeBase::PointerLevel::binaryEvaluateOperation(
                 a, b,
                 [](SizeType N, T *to, T *x, T *y) {
-                    cblas_saxpy(blasint(N), ComputationConstant<T>::One, x, 1, to, 1);
-                    cblas_saxpy(blasint(N), ComputationConstant<T>::One, y, 1, to, 1);
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, x, 1});
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, y, 1});
                 },
                 [](SizeType N, T *to, T *x, T y) {
-                    cblas_saxpy(blasint(N), ComputationConstant<T>::One, x, 1, to, 1);
-                    cblas_saxpy(blasint(N), ComputationConstant<T>::One, &y, 0, to, 1);
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, x, 1});
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, &y, 0});
                 },
                 [](SizeType N, T *to, T x, T *y) {
-                    cblas_saxpy(blasint(N), ComputationConstant<T>::One, &x, 0, to, 1);
-                    cblas_saxpy(blasint(N), ComputationConstant<T>::One, y, 1, to, 1);
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, &x, 0});
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, y, 1});
                 });
         }
         return ComputeBase::template binaryEvaluateDistributor<A, B, true>(
@@ -126,8 +128,12 @@ public:
             requireDimensionBinaryOperable(a, b);
             ComputeBase::PointerLevel::binaryAssignmentOperation(
                 a, b,
-                [](SizeType N, T *to, T *x) { cblas_saxpy(blasint(N), ComputationConstant<T>::One, x, 1, to, 1); },
-                [](SizeType N, T *to, T x) { cblas_saxpy(blasint(N), ComputationConstant<T>::One, &x, 0, to, 1); });
+                [](SizeType N, T *to, T *x) {
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, x, 1});
+                },
+                [](SizeType N, T *to, T x) {
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, &x, 0});
+                });
         } else {
             ComputeBase::template binaryAssignmentDistributor(std::forward<A>(a), std::forward<B>(b),
                                                               [](auto &x, const auto &y) { x += y; });
@@ -142,16 +148,16 @@ public:
             return ComputeBase::PointerLevel::binaryEvaluateOperation(
                 a, b,
                 [](SizeType N, T *to, T *x, T *y) {
-                    cblas_saxpy(blasint(N), ComputationConstant<T>::One, x, 1, to, 1);
-                    cblas_saxpy(blasint(N), -ComputationConstant<T>::One, y, 1, to, 1);
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, x, 1});
+                    Engine::axpy({N, to, 1}, -ComputationConstant<T>::One, {N, y, 1});
                 },
                 [](SizeType N, T *to, T *x, T y) {
-                    cblas_saxpy(blasint(N), ComputationConstant<T>::One, x, 1, to, 1);
-                    cblas_saxpy(blasint(N), -ComputationConstant<T>::One, &y, 0, to, 1);
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, x, 1});
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, &y, 0});
                 },
                 [](SizeType N, T *to, T x, T *y) {
-                    cblas_saxpy(blasint(N), ComputationConstant<T>::One, &x, 0, to, 1);
-                    cblas_saxpy(blasint(N), -ComputationConstant<T>::One, y, 1, to, 1);
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, &x, 0});
+                    Engine::axpy({N, to, 1}, -ComputationConstant<T>::One, {N, y, 1});
                 });
         }
         return ComputeBase::template binaryEvaluateDistributor(std::forward<A>(a), std::forward<B>(b),
@@ -167,8 +173,12 @@ public:
             }
             ComputeBase::PointerLevel::binaryAssignmentOperation(
                 a, b,
-                [](SizeType N, T *to, T *x) { cblas_saxpy(blasint(N), -ComputationConstant<T>::One, x, 1, to, 1); },
-                [](SizeType N, T *to, T x) { cblas_saxpy(blasint(N), -ComputationConstant<T>::One, &x, 0, to, 1); });
+                [](SizeType N, T *to, T *x) {
+                    Engine::axpy({N, to, 1}, -ComputationConstant<T>::One, {N, x, 1});
+                },
+                [](SizeType N, T *to, T x) {
+                    Engine::axpy({N, to, 1}, ComputationConstant<T>::One, {N, &x, 0});
+                });
         } else {
             ComputeBase::template binaryAssignmentDistributor(std::forward<A>(a), std::forward<B>(b),
                                                               [](auto &x, const auto &y) { x -= y; });
@@ -180,13 +190,15 @@ public:
     static Base mul(A &&a, B &&b) {
         if constexpr (computational_cpu::IsT<T, B>) {
             if (isContiguousable(a)) {
-                return ComputeBase::PointerLevel::semiBinaryEvaluateOperation(
-                    a, b, [](SizeType N, T *to, T *a, T x) { cblas_saxpy(blasint(N), x, a, 1, to, 1); });
+                return ComputeBase::PointerLevel::semiBinaryEvaluateOperation(a, b, [](SizeType N, T *to, T *a, T x) {
+                    Engine::axpy({N, to, 1}, x, {N, a, 1});
+                });
             }
         } else if constexpr (computational_cpu::IsT<T, A>) {
             if (isContiguousable(b)) {
-                return ComputeBase::PointerLevel::semiBinaryEvaluateOperation(
-                    a, b, [](SizeType N, T *to, T x, T *a) { cblas_saxpy(blasint(N), x, a, 1, to, 1); });
+                return ComputeBase::PointerLevel::semiBinaryEvaluateOperation(a, b, [](SizeType N, T *to, T x, T *a) {
+                    Engine::axpy({N, to, 1}, x, {N, a, 1});
+                });
             }
         }
         return ComputeBase::template binaryEvaluateDistributor<A, B, true>(
@@ -198,8 +210,9 @@ public:
     static void mulEqual(A &&a, B &&b) {
         if constexpr (computational_cpu::IsT<T, B>) {
             if (isContiguousable(a)) {
-                ComputeBase::PointerLevel::semiBinaryFunctionAssignOperation(
-                    a, b, [](SizeType N, T *to, T x) { cblas_sscal(blasint(N), x, to, 1); });
+                ComputeBase::PointerLevel::semiBinaryFunctionAssignOperation(a, b, [](SizeType N, T *to, T x) {
+                    Engine::scal({N, to, 1}, x);
+                });
                 return;
             }
         }
@@ -213,8 +226,8 @@ public:
         if constexpr (computational_cpu::IsT<T, B>) {
             if (isContiguousable(a)) {
                 return ComputeBase ::PointerLevel::semiBinaryEvaluateOperation(
-                    a, b, [d = ComputationConstant<T>::One](SizeType N, T *to, T *a, T _) {
-                        cblas_saxpy(blasint(N), d, a, 1, to, 1);
+                    a, b, [d = ComputationConstant<T>::One / b](SizeType N, T *to, T *a, T _) {
+                        Engine::axpy({N, to, 1}, d, {N, to, 1});
                     });
             }
         }
@@ -229,7 +242,7 @@ public:
             if (isContiguousable(a)) {
                 ComputeBase::PointerLevel::semiBinaryFunctionAssignOperation(
                     a, b, [d = ComputationConstant<T>::One / b](SizeType N, T *to, T _) {
-                        cblas_sscal(blasint(N), d, to, 1);
+                        Engine::scal({N, to, 1}, d);
                     });
                 return;
             }
@@ -244,8 +257,13 @@ public:
     static void setEqual(A &&a, B &&b) {
         if (isContiguousable(a, b)) {
             ComputeBase::PointerLevel::binaryAssignmentOperation(
-                a, b, [](SizeType N, T *to, T *x) { cblas_scopy(blasint(N), x, 1, to, 1); },
-                [](SizeType N, T *to, T x) { cblas_scopy(blasint(N), &x, 0, to, 1); });
+                a, b,
+                [](SizeType N, T *to, T *x) {
+                    Engine::copy({N, to, 1}, {N, x, 1});
+                },
+                [](SizeType N, T *to, T x) {
+                    Engine::copy({N, to, 1}, {N, &x, 0});
+                });
         }
         ComputeBase::template binaryAssignmentDistributor(std::forward<A>(a), std::forward<B>(b),
                                                           [](auto &x, const auto &y) { x = y; });
@@ -275,7 +293,7 @@ public:
         if (isContiguousable(a)) {
             Base result = Base::ofShape();
             T tmp = ComputationConstant<T>::One;
-            (*result.raw()) = cblas_sdot(blasint(a.getTotalSize()), a.raw(), 1, &tmp, 0);
+            (*result.raw()) = Engine::dot({a.getTotalSize(), a.raw(), 1}, {a.getTotalSize(), &tmp, 0});
             return result;
         }
         return ComputeBase::template dimensionalOperation(
@@ -307,11 +325,12 @@ public:
             }
             T *tmpdot = new T[sz];
             T tmp = ComputationConstant<T>::One;
-            cblas_scopy(blasint(sz), &tmp, 0, tmpdot, 1);
+            Engine::copy({sz, tmpdot, 1}, {sz, &tmp, 0});
 
-            cblas_sgemv(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, to.getTotalSize(), sz,
-                        ComputationalConstant<T>::One, a.raw(), sz, tmpdot, 1, ComputationConstant<T>::Zero, to.raw(),
-                        1);
+            Engine::gemv(compute::ComputeMatrix<T>::ROW, ComputationConstant<T>::Zero, {to.getTotalSize(), to.raw(), 1},
+                         ComputationConstant<T>::One,
+                         {compute::ComputeMatrix<T>::NO_TRANS, to.getTotalSize(), sz, a.raw(), sz}, {sz, tmpdot, 1});
+
             delete[] tmpdot;
             return to;
         }
@@ -350,17 +369,29 @@ public:
                 auto pa = a.raw();
                 auto pb = b.raw();
 
-                cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE ::CblasNoTrans, CBLAS_TRANSPOSE::CblasNoTrans,
-                            blasint(nums * n), blasint(k), blasint(m), ComputationConstant<T>::One, pa, blasint(m), pb,
-                            blasint(k), ComputationConstant<T>::Zero, pto, blasint(k));
+                //                cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE ::CblasNoTrans,
+                //                CBLAS_TRANSPOSE::CblasNoTrans,
+                //                            blasint(nums * n), blasint(k), blasint(m), ComputationConstant<T>::One,
+                //                            pa, blasint(m), pb, blasint(k), ComputationConstant<T>::Zero, pto,
+                //                            blasint(k));
+
+                Engine::gemm(compute::ComputeMatrix<T>::ROW, ComputationConstant<T>::Zero,
+                             {compute::ComputeMatrix<T>::NO_TRANS, nums * n, k, pto, k}, ComputationConstant<T>::One,
+                             {compute::ComputeMatrix<T>::NO_TRANS, nums * n, m, pa, m},
+                             {compute::ComputeMatrix<T>::NO_TRANS, m, k, pb, k});
+
             } else {
                 ComputeBase ::PointerLevel::multinaryOperation(
                     nums * n * k, n * k,
                     [n, m, k](SizeType ignore, T *to, T *a, T *b) {
-                        cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans,
-                                    CBLAS_TRANSPOSE::CblasNoTrans, blasint(n), blasint(k), blasint(m),
-                                    ComputationConstant<T>::One, a, blasint(m), b, blasint(k),
-                                    ComputationConstant<T>::Zero, to, blasint(k));
+                        //                        cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans,
+                        //                                    CBLAS_TRANSPOSE::CblasNoTrans, blasint(n), blasint(k),
+                        //                                    blasint(m), ComputationConstant<T>::One, a, blasint(m), b,
+                        //                                    blasint(k), ComputationConstant<T>::Zero, to, blasint(k));
+                        Engine::gemm(compute::ComputeMatrix<T>::ROW, ComputationConstant<T>::Zero,
+                                     {compute::ComputeMatrix<T>::NO_TRANS, n, k, to, k}, ComputationConstant<T>::One,
+                                     {compute::ComputeMatrix<T>::NO_TRANS, n, m, a, m},
+                                     {compute::ComputeMatrix<T>::NO_TRANS, m, k, b, k});
                     },
                     std::make_pair(to.raw(), std::make_tuple(n * k, SizeType(0), to.getTotalSize())),
                     std::make_pair(a.raw(), std::make_tuple(n * m, SizeType(0), a.getTotalSize())),
@@ -416,7 +447,8 @@ public:
                             T *pac = pa + batch * C * H * W + c * H * W;
 
                             for (SizeType i = 0; i < oH; i++) {
-                                cblas_scopy(oW, pac + (i + x) * W + y, 1, ker + Batch * (i * oW), Batch);
+                                // cblas_scopy(oW, pac + (i + x) * W + y, 1, ker + Batch * (i * oW), Batch);
+                                Engine::copy({oW, pac + (i + x) * W + y, 1}, {oW, ker + Batch * (i + oW), Batch});
 
                                 /*for (SizeType j = 0; j < oW; j++) {
                                     ker[Batch * (i * oW + j)] = pac[(i + x) * W + (j + y)];
@@ -429,15 +461,25 @@ public:
                 }
             }
 
-            cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE ::CblasNoTrans, CBLAS_TRANSPOSE ::CblasNoTrans, D,
-                        oH * oW * Batch, C * X * Y, ComputationConstant<T>::One, pb, C * X * Y, matConv,
-                        oH * oW * Batch, ComputationConstant<T>::Zero, pres, oH * oW * Batch);
+            // cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE ::CblasNoTrans, CBLAS_TRANSPOSE ::CblasNoTrans,
+            // D,
+            //            oH * oW * Batch, C * X * Y, ComputationConstant<T>::One, pb, C * X * Y, matConv,
+            //            oH * oW * Batch, ComputationConstant<T>::Zero, pres, oH * oW * Batch);
+
+            Engine::gemm(compute::ComputeMatrix<T>::ROW, ComputationConstant<T>::Zero,
+                         {compute::ComputeMatrix<T>::NO_TRANS, D, oH * oW * Batch, pres, oH * oW * Batch},
+                         ComputationConstant<T>::One,
+                         {compute::ComputeMatrix<T>::NO_TRANS, D, C * X * Y, pb, C * X * Y},
+                         {compute::ComputeMatrix<T>::NO_TRANS, C * X * Y, oH * oW * Batch, matConv, oH * oW * Batch});
 
             // now, pres is (D * oH * oW) * Batch
             // transpose
 
-            cblas_simatcopy(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasTrans, D * oH * oW, Batch,
-                            ComputationConstant<T>::One, pres, Batch, D * oH * oW);
+            // cblas_simatcopy(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasTrans, D * oH * oW, Batch,
+            //                ComputationConstant<T>::One, pres, Batch, D * oH * oW);
+            Engine::imatcopy(compute::ComputeMatrix<T>::ROW,
+                             {compute::ComputeMatrix<T>::TRANS, D * oH * oW, Batch, pres, Batch},
+                             ComputationConstant<T>::One, D * oH * oW);
 
             delete[] matConv;
 

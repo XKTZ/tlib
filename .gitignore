@@ -3,3 +3,5 @@
 ./pack.sh
 ./.idea
 ./export
+./includes/
+./lib/

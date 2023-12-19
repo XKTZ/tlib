@@ -1,9 +1,9 @@
 #ifndef __TLIB_TENSOR_CPU_COMPUTATION_HPP__
 #define __TLIB_TENSOR_CPU_COMPUTATION_HPP__
 
-#include "tlib/tensor/cpu/tensor_cpu.hpp"
-#include "tlib/tensor/cpu/tensor_cpu_computation_base.hpp"
 #include "tlib/tensor/tensor_computational.hpp"
+#include "tensor_cpu.hpp"
+#include "tensor_cpu_computation_base.hpp"
 
 namespace tensorlib {
 namespace tensor {
@@ -589,6 +589,6 @@ public:
 }; // namespace tensor
 }; // namespace tensorlib
 
-#include "tlib/tensor/cpu/tensor_cpu_computation_optimization.hpp"
+#include "tensor_cpu_computation_optimization.hpp"
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef __TLIB__NN_LINEAR_HPP__
 #define __TLIB__NN_LINEAR_HPP__
 
-#include "tlib/nn/module.hpp"
+#include "module.hpp"
 
 namespace tensorlib {
 namespace nn {

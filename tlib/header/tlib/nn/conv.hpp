@@ -3,8 +3,8 @@
 
 #include <utility>
 
-#include "tlib/nn/module.hpp"
-#include "tlib/nn/activation.hpp"
+#include "activation.hpp"
+#include "module.hpp"
 
 namespace tensorlib {
 namespace nn {

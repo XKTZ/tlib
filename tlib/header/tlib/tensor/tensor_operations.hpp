@@ -1,8 +1,7 @@
 #ifndef __TLIB__TENSOR_OPERATIONS_HPP__
 #define __TLIB__TENSOR_OPERATIONS_HPP__
 
-#include "tlib/tensor/tensor.hpp"
-#include "tlib/tensor/tensor_print.hpp"
+#include "tensor.hpp"
 
 namespace tensorlib {
 namespace tensor {

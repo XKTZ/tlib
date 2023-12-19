@@ -1,6 +1,8 @@
 #ifndef __TLIB__VISION_HPP__
 #define __TLIB__VISION_HPP__
 
+#if _TLIB_CONFIG_VISION
+
 #include "png.hpp"
 #include "tlib/tlib_dimensional.hpp"
 #include "tlib/tlib_tensor.hpp"
@@ -165,5 +167,7 @@ using PNGWriter = ImageWriter<IMAGE_PNG>;
 
 }; // namespace vision
 }; // namespace tensorlib
+
+#endif
 
 #endif
